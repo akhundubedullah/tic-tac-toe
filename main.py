@@ -1,66 +1,64 @@
+import tkinter as tk
+from tkinter import messagebox
 import random
 
-choices = ["X", "O"]
-Player1 = random.choice(choices)
-choices.remove(Player1)
-Player2 = choices[0]
-print("Player 1 has been assigned =", Player1)
-print("Player 2 has been assigned =", Player2)
+root = tk.Tk()
+root.title("Tic Tac Toe")
 
-
-rows, cols = 3, 3
-arr = [[' ' for _ in range(cols)] for _ in range(rows)]
-
-def print_board(board):
-    for row in board:
-        print('|'.join(row))
-        print('-' * 5)
-
-
+# Game logic
 def check_win(board, player):
-    # Check rows and columns
     for i in range(3):
-        if (board[i][0] == player and board[i][1] == player and board[i][2] == player) or \
-           (board[0][i] == player and board[1][i] == player and board[2][i] == player):
+        if (board[i][0]["text"] == player and board[i][1]["text"] == player and board[i][2]["text"] == player) or \
+           (board[0][i]["text"] == player and board[1][i]["text"] == player and board[2][i]["text"] == player):
             return True
 
-    # Check diagonals
-    if (board[0][0] == player and board[1][1] == player and board[2][2] == player) or \
-       (board[0][2] == player and board[1][1] == player and board[2][0] == player):
+    if (board[0][0]["text"] == player and board[1][1]["text"] == player and board[2][2]["text"] == player) or \
+       (board[0][2]["text"] == player and board[1][1]["text"] == player and board[2][0]["text"] == player):
         return True
 
     return False
 
+def check_draw(board):
+    for row in board:
+        for button in row:
+            if button["text"] == " ":
+                return False
+    return True
 
-def play_game():
-    current_player = Player1
-    while True:
-        print_board(arr)
-        cord1 = int(input(f"{current_player}, enter the row index (0-2): "))
-        cord2 = int(input(f"{current_player}, enter the column index (0-2): "))
-        
-        
-        if arr[cord1][cord2] != ' ':
-            print("This position is already filled. Please choose a different position.")
-            continue
-        
-        # Place the player's symbol on the board
-        arr[cord1][cord2] = current_player
-        
-        
-        if check_win(arr, current_player):
-            print_board(arr)
-            print(f"Player {current_player} wins!")
-            break
-        
-     
-        if all(all(cell != ' ' for cell in row) for row in arr):
-            print_board(arr)
-            print("The game is a draw!")
-            break
-        
-        # Switch turns to the other player
-        current_player = Player2 if current_player == Player1 else Player1
+# Initialize the board
+buttons = [[None]*3 for _ in range(3)]
+current_player = random.choice(["X", "O"])
 
+# Function to handle button click
+def on_click(row, col):
+    global current_player
+    
+    if buttons[row][col]["text"] == " ":
+        buttons[row][col]["text"] = current_player
+        
+        if check_win(buttons, current_player):
+            messagebox.showinfo("Tic Tac Toe", f"Player {current_player} wins!")
+            reset_board()
+        elif check_draw(buttons):
+            messagebox.showinfo("Tic Tac Toe", "The game is a draw!")
+            reset_board()
+        else:
+            current_player = "O" if current_player == "X" else "X"
 
-play_game()
+# Function to reset the board
+def reset_board():
+    global current_player
+    current_player = random.choice(["X", "O"])
+    for i in range(3):
+        for j in range(3):
+            buttons[i][j]["text"] = " "
+
+# Create buttons for each cell
+for i in range(3):
+    for j in range(3):
+        buttons[i][j] = tk.Button(root, text=" ", font=("Arial", 20), width=5, height=2,
+                                  command=lambda row=i, col=j: on_click(row, col))
+        buttons[i][j].grid(row=i, column=j)
+
+# Start the main event loop
+root.mainloop()
